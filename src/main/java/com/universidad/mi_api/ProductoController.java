@@ -20,27 +20,25 @@ public class ProductoController {
     // REQUERIMIENTO 3: Endpoint GET (Consultar todos)
     @GetMapping
     public List<Producto> obtenerTodos() {
-        return productos; // Spring convierte automáticamente esta lista a formato JSON
+        return productos; 
     }
 
     // REQUERIMIENTO 4: Endpoint GET por ID
     @GetMapping("/{id}")
     public ResponseEntity<Producto> obtenerPorId(@PathVariable int id) {
-        // Buscamos el producto en la lista que coincida con el ID recibido
         for (Producto p : productos) {
             if (p.getId() == id) {
-                return ResponseEntity.ok(p); // Retorna el producto con estado 200 OK
+                return ResponseEntity.ok(p); 
             }
         }
-        // Si sale del bucle y no lo encuentra, maneja el caso retornando 404 Not Found
         return ResponseEntity.notFound().build();
     }
 
     // REQUERIMIENTO 5: Endpoint POST (Crear)
     @PostMapping
     public String crear(@RequestBody Producto nuevoProducto) {
-        productos.add(nuevoProducto); // Agrega el nuevo producto que envía el cliente a la lista
-        return "Producto agregado con éxito"; // Mensaje de confirmación
+        productos.add(nuevoProducto); 
+        return "Producto agregado con éxito"; 
     }
 
     // REQUERIMIENTO 6: Endpoint PUT (Actualizar)
@@ -48,19 +46,17 @@ public class ProductoController {
     public ResponseEntity<Producto> actualizar(@PathVariable int id, @RequestBody Producto datosNuevos) {
         for (Producto p : productos) {
             if (p.getId() == id) {
-                // Modificamos los atributos del elemento existente con los nuevos datos
                 p.setNombre(datosNuevos.getNombre());
                 p.setPrecio(datosNuevos.getPrecio());
-                return ResponseEntity.ok(p); // Retorna el elemento actualizado
+                return ResponseEntity.ok(p); 
             }
         }
-        return ResponseEntity.notFound().build(); // Si el ID no existe, retorna 404
+        return ResponseEntity.notFound().build(); 
     }
 
     // REQUERIMIENTO 7: Endpoint DELETE (Eliminar)
     @DeleteMapping("/{id}")
     public String eliminar(@PathVariable int id) {
-        // Remueve de la lista si el ID coincide
         boolean eliminado = productos.removeIf(p -> p.getId() == id);
         
         if (eliminado) {
