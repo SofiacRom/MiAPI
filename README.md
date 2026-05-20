@@ -23,3 +23,8 @@ Este es un proyecto universitario desarrollado en **Java con Spring Boot (versi�
 | **POST** | `/productos` | Agrega un nuevo producto enviando un JSON. |
 | **PUT** | `/productos/{id}` | Modifica un producto existente según su ID. |
 | **DELETE** | `/productos/{id}` | Elimina de la lista el producto con el ID indicado. |
+
+## Interfaz Gráfica (Frontend)
+El proyecto incluye una interfaz web moderna y limpia construida con HTML, JavaScript nativo y Tailwind CSS. 
+* Para acceder, simplemente enciende el servidor y entra a: `http://localhost:5000`
+* Permite interactuar visualmente con todos los métodos de la API en tiempo real.
