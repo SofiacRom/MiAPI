@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Productos</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased">
+
+    <div class="max-w-4xl mx-auto p-6">
+        <header class="mb-8 text-center">
+            <h1 class="text-3xl font-extrabold text-indigo-600">📦 Panel de Productos</h1>
+            <p class="text-gray-500 mt-2">Interfaz gráfica conectada a tu API en Spring Boot</p>
+        </header>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="md:col-span-1 bg-white p-6 rounded-2xl shadow-sm border border-gray-100 h-fit">
+                <h2 id="form-title" class="text-xl font-bold mb-4 text-gray-700">Agregar Producto</h2>
+                <form id="producto-form" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">ID del Producto</label>
+                        <input type="number" id="prod-id" class="mt-1 w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">Nombre</label>
+                        <input type="text" id="prod-nombre" class="mt-1 w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-600">Precio ($)</label>
+                        <input type="number" step="0.01" id="prod-precio" class="mt-1 w-full p-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-indigo-400 focus:outline-none" required>
+                    </div>
+                    <button type="submit" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 rounded-lg transition-colors shadow-sm">
+                        Guardar Producto
+                    </button>
+                </form>
+            </div>
+
+            <div class="md:col-span-2 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+                <h2 class="text-xl font-bold mb-4 text-gray-700">Inventario Actual</h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="border-b border-gray-100 text-gray-400 text-sm uppercase">
+                                <th class="py-3 px-4">ID</th>
+                                <th class="py-3 px-4">Nombre</th>
+                                <th class="py-3 px-4">Precio</th>
+                                <th class="py-3 px-4 text-right">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tabla-productos" class="divide-y divide-gray-50 text-sm">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = '/productos';
+        async function cargarProductos() {
+            const res = await fetch(API_URL);
+            const productos = await res.json();
+            const tabla = document.getElementById('tabla-productos');
+            tabla.innerHTML = '';
+
+            productos.forEach(p => {
+                tabla.innerHTML += `
+                    <tr class="hover:bg-gray-50/70 transition-colors">
+                        <td class="py-3 px-4 font-mono font-bold text-indigo-600">#${p.id}</td>
+                        <td class="py-3 px-4 font-medium text-gray-900">${p.nombre}</td>
+                        <td class="py-3 px-4 text-gray-600">$${p.precio.toFixed(2)}</td>
+                        <td class="py-3 px-4 text-right space-x-2">
+                            <button onclick="prepararEdicion(${p.id}, '${p.nombre}', ${p.precio})" class="text-blue-600 hover:text-blue-800 font-medium">Editar</button>
+                            <button onclick="eliminarProducto(${p.id})" class="text-red-600 hover:text-red-800 font-medium">Eliminar</button>
+                        </td>
+                    </tr>
+                `;
+            });
+        }
+
+        document.getElementById('producto-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const id = document.getElementById('prod-id').value;
+            const nombre = document.getElementById('prod-nombre').value;
+            const precio = document.getElementById('prod-precio').value;
+            const producto = { id: parseInt(id), nombre, precio: parseFloat(precio) };
+            const editando = document.getElementById('prod-id').disabled;
+
+            if (editando) {
+                await fetch(`${API_URL}/${id}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(producto)
+                });
+            } else {
+                await fetch(API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(producto)
+                });
+            }
+
+            resetearFormulario();
+            cargarProductos();
+        });
+
+        async function eliminarProducto(id) {
+            if (confirm('¿Seguro que deseas eliminar este producto?')) {
+                await fetch(`${API_URL}/${id}`, { method: 'DELETE' });
+                cargarProductos();
+            }
+        }
+
+        function prepararEdicion(id, nombre, precio) {
+            document.getElementById('prod-id').value = id;
+            document.getElementById('prod-id').disabled = true; 
+            document.getElementById('prod-nombre').value = nombre;
+            document.getElementById('prod-precio').value = precio;
+            document.getElementById('form-title').innerText = 'Editar Producto #' + id;
+        }
+
+        function resetearFormulario() {
+            document.getElementById('producto-form').reset();
+            document.getElementById('prod-id').disabled = false;
+            document.getElementById('form-title').innerText = 'Agregar Producto';
+        }
+        cargarProductos();
+    </script>
+</body>
+</html>
